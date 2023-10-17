@@ -56,6 +56,17 @@ public class Sprite3D : MonoBehaviour
     }
 
     void Update() {
+	// adjust colors
+	if (this.lGo.GetComponent<SpriteRenderer>().color != this.config.lColor) {
+	    this.lGo.GetComponent<SpriteRenderer>().color = this.config.lColor;
+	}
+	if (this.GetComponent<SpriteRenderer>().color != this.config.mColor) {
+	    this.GetComponent<SpriteRenderer>().color = this.config.mColor;
+	}
+	if (this.rGo.GetComponent<SpriteRenderer>().color != this.config.rColor) {
+	    this.rGo.GetComponent<SpriteRenderer>().color = this.config.rColor;
+	}
+	
 	// return early if no change to depth
 	if (this.nextDepth == this.depth) {
 	    return;
