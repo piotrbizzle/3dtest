@@ -14,11 +14,11 @@ def main(file_name):
         for offset_base in range(5):
             offset = 10 * (offset_base + 1)
             l_array, r_array = [], []            
-            for x in range(img.size[0]):
+            for x in range(img.size[1]):
                 l_array.append([])            
                 r_array.append([])
                 r_array[x] += [0] * (2 * offset)
-                for y in range(img.size[1]):
+                for y in range(img.size[0]):
                     pixel = img.getpixel((y,x))
                     # 0 = empty, 1 = black, 2 = white
                     p_value = 0 if not pixel[1] else (1 if not pixel[0] else 2)
