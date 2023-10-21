@@ -59,9 +59,9 @@ def main(depth, file_name):
                         r_draw.point((x, y), fill=(0, 0, 0, 255))
                     elif l_p_value == 0:
                         l_draw.point((x, y), fill=(0, 0, 0, 255))
-            l_img.save("out/" + str(offset_base) + "l_"+ file_name, "PNG")
-            m_img.save("out/" + str(offset_base) + "m_" + file_name, "PNG")
-            r_img.save("out/" + str(offset_base) + "r_" + file_name, "PNG")
+            l_img.save("out/" + file_name[:-4] + "_" + str(offset_base) + "l.png", "PNG")
+            m_img.save("out/" + file_name[:-4] + "_" + str(offset_base) + "m.png", "PNG")
+            r_img.save("out/" + file_name[:-4] + "_" + str(offset_base) + "r.png", "PNG")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

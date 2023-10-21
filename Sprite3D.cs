@@ -26,14 +26,14 @@ public class Sprite3D : MonoBehaviour
 	
 	// load all required sprites
 	if (this.isStatic) {
-	    this.lSprites[this.depth] = Resources.Load<Sprite>(this.depth.ToString() + "l_" + this.name);
-	    this.mSprites[this.depth] = Resources.Load<Sprite>(this.depth.ToString() + "m_" + this.name);
-	    this.rSprites[this.depth] = Resources.Load<Sprite>(this.depth.ToString() + "r_" + this.name);
+	    this.lSprites[this.depth] = Resources.Load<Sprite>(this.name + "_" + this.depth.ToString() + "l");
+	    this.mSprites[this.depth] = Resources.Load<Sprite>(this.name + "_" + this.depth.ToString() + "m");
+	    this.rSprites[this.depth] = Resources.Load<Sprite>(this.name + "_" + this.depth.ToString() + "r");
 	} else {
 	    for (int i = 0; i < 5; i++) {
-		this.lSprites[i] = Resources.Load<Sprite>(i.ToString() + "l_" + this.name);
-		this.mSprites[i] = Resources.Load<Sprite>(i.ToString() + "m_" + this.name);
-		this.rSprites[i] = Resources.Load<Sprite>(i.ToString() + "r_" + this.name);
+		this.lSprites[i] = Resources.Load<Sprite>(this.name + "_" + i.ToString() + "l");
+		this.mSprites[i] = Resources.Load<Sprite>(this.name + "_" + i.ToString() + "m");
+		this.rSprites[i] = Resources.Load<Sprite>(this.name + "_" + i.ToString() + "r");		
 	    }
 	}
 	
