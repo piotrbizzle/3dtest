@@ -52,7 +52,7 @@ public class Sprite3D : MonoBehaviour
 
 	// init nextDepth
 	this.nextDepth = this.depth;
-	this.depth = 0;
+	this.depth = -1;
     }
 
     void Update() {
@@ -85,14 +85,14 @@ public class Sprite3D : MonoBehaviour
 
     }
 
-    void SetDepth(int depth) {
+    public void SetDepth(int depth) {
 	if (this.isStatic) {
 	    return;
 	}
 	this.nextDepth = depth;
     }
 
-    int GetDepth(int depth) {
+    public int GetDepth() {
 	return this.depth;
     }
 }
