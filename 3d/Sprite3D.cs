@@ -6,9 +6,10 @@ public class Sprite3D : MonoBehaviour
 {
 
     public bool isStatic;
+    public bool isScaling;
     public int depth;
     
-    private int nextDepth;
+    public bool isDepthDirty; // does depth need an update
 
     private Config3D config;
     
@@ -18,6 +19,7 @@ public class Sprite3D : MonoBehaviour
     private Sprite[] lSprites = new Sprite[5];
     private Sprite[] mSprites = new Sprite[5];
     private Sprite[] rSprites = new Sprite[5];
+
     
     void Start() {
 	// get color config
@@ -50,8 +52,7 @@ public class Sprite3D : MonoBehaviour
 	this.rGo.AddComponent<SpriteRenderer>().color = this.config.rColor;
 
 	// init nextDepth
-	this.nextDepth = this.depth;
-	this.depth = -1;
+	this.isDepthDirty = true;
     }
 
     void Update() {
@@ -67,12 +68,12 @@ public class Sprite3D : MonoBehaviour
 	}
 	
 	// return early if no change to depth
-	if (this.nextDepth == this.depth) {
+	if (!this.isDepthDirty) {
 	    return;
 	}
+	this.isDepthDirty = false;
 
 	// update sprites for new depth
-	this.depth = this.nextDepth;
         this.lGo.GetComponent<SpriteRenderer>().sprite = this.lSprites[this.depth];
 	this.lGo.GetComponent<SpriteRenderer>().sortingLayerID = SortingLayer.NameToID("D" + this.depth.ToString());
 	
@@ -82,13 +83,31 @@ public class Sprite3D : MonoBehaviour
 	this.rGo.GetComponent<SpriteRenderer>().sprite = this.rSprites[this.depth];
 	this.rGo.GetComponent<SpriteRenderer>().sortingLayerID = SortingLayer.NameToID("D" + this.depth.ToString());
 
+	// scale if needed
+	if (this.isScaling) {
+	    this.ScaleSprite();
+	}	
+    }
+
+    private void ScaleSprite() {
+	// skip scaling for held items
+	if (this.transform.GetComponent<PickUpable>() != null && this.transform.parent.GetComponent<Player>() != null) {
+	    return;
+	}
+	float scaleFactor = this.GetScaleFactor();
+	this.transform.localScale = new Vector3(scaleFactor, scaleFactor, 1f);
+    }
+
+    public float GetScaleFactor() {
+	return 1f - 0.08f * this.depth;
     }
 
     public void SetDepth(int depth) {
 	if (this.isStatic) {
 	    return;
 	}
-	this.nextDepth = depth;
+	this.depth = depth;
+	this.isDepthDirty = true;
     }
 
     public int GetDepth() {

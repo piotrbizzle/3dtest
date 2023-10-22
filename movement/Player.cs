@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    [SerializeField]
+    private Screen currentScreen;
+    
     // screen boundaries
     private const float ScreenTopY = 4.2f;
     private const float ScreenBottomY = -4.2f;
@@ -11,16 +14,44 @@ public class Player : MonoBehaviour
     private const float ScreenLeftX = -5.2f;
     private const float ScreenEdgeBuffer = 0.25f;
 
-    private string currentTile = "0_0_democellmap";
+    // name of current screen, for collisions
+    private string currentTile;
+    private bool inited;
+
+    // controls
+    private bool qHeld;
+    private bool eHeld;
+    private bool spaceHeld;
     
     void Start() {
-        
+       this.currentTile = this.currentScreen.name;
+
+       // collision
+       this.gameObject.AddComponent<BoxCollider2D>();
+       this.gameObject.GetComponent<BoxCollider2D>().size = this.GetComponent<SpriteRenderer>().size;
+
+       Rigidbody2D rb = this.gameObject.AddComponent<Rigidbody2D>();
+       rb.gravityScale = 0.0f;
+       rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+       rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+       rb.sleepMode = RigidbodySleepMode2D.NeverSleep;
+    }
+
+    // init runs on the first call to Update
+    void Init() {
+	this.inited = true;
+	this.currentScreen.gameObject.SetActive(true);
     }
 
     void Update() {
-         this.Move();	 
+	if (!inited) {
+	    this.Init();
+	}
+	this.Act();
+	this.Move();	
+	this.MoveScreens();
     }
-
+    
     private void Move() {
 	// get input
 	bool up = Input.GetKey("w");
@@ -86,6 +117,12 @@ public class Player : MonoBehaviour
 
 	    Debug.Log("stepup");
 	    this.GetComponent<Sprite3D>().SetDepth(depth - 1);
+	    foreach (Transform child in this.gameObject.transform) {
+		if (child.gameObject.GetComponent<PickUpable>()) {
+		    child.GetComponent<Sprite3D>().SetDepth(depth - 1);
+		}
+	    }
+	    this.FixInventory();
 	    return;
 	}
 
@@ -99,6 +136,12 @@ public class Player : MonoBehaviour
 	if (belowFull) {
 	    Debug.Log("stepdown");
 	    this.GetComponent<Sprite3D>().SetDepth(depth + 1);
+	    foreach (Transform child in this.gameObject.transform) {
+		if (child.gameObject.GetComponent<PickUpable>()) {
+		    child.GetComponent<Sprite3D>().SetDepth(depth + 1);
+		}
+	    }
+	    this.FixInventory();
 	    return;
 	}
 
@@ -106,5 +149,148 @@ public class Player : MonoBehaviour
 	Debug.Log("cliff");
 	this.transform.position = previousPosition;
 	return;
+    }
+
+    private void MoveScreens() {
+	// go north
+	Transform playerTransform = this.gameObject.transform;
+	if (playerTransform.position.y > ScreenTopY && currentScreen.north != null) {
+	    playerTransform.Translate(new Vector3(0.0f, -8f, 0.0f));
+    	    this.SwapScreens(this.currentScreen.north);
+	}
+	// go south
+	if (playerTransform.position.y < ScreenBottomY && currentScreen.south != null) {
+	    playerTransform.Translate(new Vector3(0.0f, 8f, 0.0f));
+    	    this.SwapScreens(this.currentScreen.south);
+	}
+	// go east
+	if (playerTransform.position.x > ScreenRightX && currentScreen.east != null) {
+    	    playerTransform.Translate(new Vector3(-10f, 0.0f, 0.0f));
+	    this.SwapScreens(this.currentScreen.east);
+	}
+	// go west
+	if (playerTransform.position.x < ScreenLeftX && currentScreen.west != null) {
+	    playerTransform.Translate(new Vector3(10f, 0.0f, 0.0f));
+	    this.SwapScreens(this.currentScreen.west);
+	}
+    }
+
+    private void SwapScreens(Screen newScreen) {
+	this.currentScreen.gameObject.SetActive(false);
+	this.currentScreen = newScreen;
+	this.currentTile = this.currentScreen.name;
+	this.currentScreen.gameObject.SetActive(true);
+    }
+
+    private void Act() {	
+	// pick up item
+	this.eHeld = Input.GetKey("e");
+
+	// drop item
+	bool qPressed = Input.GetKey("q");
+	if (qPressed && !this.qHeld) {
+	    this.Drop();
+	}
+	this.qHeld = qPressed;
+
+	// interact
+	this.spaceHeld = Input.GetKey("space");
+    }
+    
+    void OnTriggerStay2D(Collider2D collider) {
+	/*
+	if (this.inkStory.isVisible) {
+	    return;
+	}
+
+	// start dialogue
+	Dialogue dialogue = collider.gameObject.GetComponent<Dialogue>();
+	if (dialogue != null && this.spaceHeld) {	    
+	    this.inkStory.OpenStory(dialogue.startingKnot, dialogue.gameObject.GetComponent<SpriteRenderer>().sprite);
+	    return;
+	}
+	*/
+	
+	// pick up item
+	PickUpable item = collider.gameObject.GetComponent<PickUpable>();
+	if (item != null && this.eHeld) {
+	    this.PickUp(item);
+	    return;
+	}
+	/*
+	// identify item
+	if (item != null && item.pickUpable && this.spaceHeld) {
+	    this.inkStory.OpenStory("item_" + item.GetItemName(), item.gameObject.GetComponent<SpriteRenderer>().sprite);
+	    return;
+	}
+	*/
+    }
+
+    private void PickUp(PickUpable item) {
+	// don't pick up if already held
+	if (item.gameObject.transform.parent == this.gameObject.transform) {
+	    return;
+	}
+
+	// don't pick up if on a different depth
+	if (item.GetComponent<Sprite3D>().GetDepth() != this.GetComponent<Sprite3D>().GetDepth()) {
+	    return;
+	}
+	
+
+	// check if there is room in the inventory
+	int heldItemsCount = 0;
+	for (int i = 0; i < this.gameObject.transform.childCount; i++) {
+	    Transform child = this.gameObject.transform.GetChild(i);
+
+	    // count pickupables only
+	    if (child.gameObject.GetComponent<PickUpable>() == null) {
+		continue;
+	    }
+	    heldItemsCount += 1;
+	}	    
+	if (heldItemsCount >= 3) {
+	    return;
+	}
+
+	// add item to player
+	GameObject itemGo = item.gameObject;
+	itemGo.transform.parent = this.gameObject.transform;
+
+	this.FixInventory();
+	
+	// this.UpdateInkStoryInventory();
+    }
+
+    private void FixInventory() {
+	Vector3 playerPosition = this.gameObject.transform.position;
+	int itemCount = 0;
+	for (int i = 0; i < this.gameObject.transform.childCount; i++) {
+	    Transform child = this.gameObject.transform.GetChild(i);
+
+	    // skip non-pickupables
+	    if (child.gameObject.GetComponent<PickUpable>() == null) {
+		continue;
+	    }
+
+	    float scaleFactor = this.GetComponent<Sprite3D>().GetScaleFactor();
+	    float offset = 1.5f * scaleFactor;
+	    child.position = new Vector3(playerPosition.x, playerPosition.y + (itemCount + 1) * offset, 0.0f);
+	    itemCount += 1;
+	}
+    }
+
+    private void Drop() {
+	for (int i = 0; i < this.gameObject.transform.childCount; i++) {
+	    Transform child = this.gameObject.transform.GetChild(this.gameObject.transform.childCount - i - 1);
+	    if (child.GetComponent<PickUpable>()) {
+		// drop first item found and return
+		child.position = this.gameObject.transform.position;
+		child.parent = this.currentScreen.gameObject.transform;
+		return;
+	    }
+	}
+
+	// this.UpdateInkStoryInventory();
     }
 }
