@@ -6,6 +6,9 @@ public class Player : MonoBehaviour
 {
     [SerializeField]
     private Screen currentScreen;
+
+    // ink stuff
+    public InkStory inkStory;
     
     // screen boundaries
     private const float ScreenTopY = 4.2f;
@@ -43,9 +46,12 @@ public class Player : MonoBehaviour
 	this.currentScreen.gameObject.SetActive(true);
     }
 
-    void Update() {
+    void Update() {	
 	if (!inited) {
 	    this.Init();
+	}
+	if (this.inkStory.isVisible) {
+	    return;
 	}
 	this.Act();
 	this.Move();	
@@ -198,7 +204,6 @@ public class Player : MonoBehaviour
     }
     
     void OnTriggerStay2D(Collider2D collider) {
-	/*
 	if (this.inkStory.isVisible) {
 	    return;
 	}
@@ -206,10 +211,9 @@ public class Player : MonoBehaviour
 	// start dialogue
 	Dialogue dialogue = collider.gameObject.GetComponent<Dialogue>();
 	if (dialogue != null && this.spaceHeld) {	    
-	    this.inkStory.OpenStory(dialogue.startingKnot, dialogue.gameObject.GetComponent<SpriteRenderer>().sprite);
+	    this.inkStory.OpenStory(dialogue.startingKnot, dialogue.gameObject.GetComponent<Sprite3D>().dialogueSprite);
 	    return;
 	}
-	*/
 	
 	// pick up item
 	PickUpable item = collider.gameObject.GetComponent<PickUpable>();
@@ -217,13 +221,6 @@ public class Player : MonoBehaviour
 	    this.PickUp(item);
 	    return;
 	}
-	/*
-	// identify item
-	if (item != null && item.pickUpable && this.spaceHeld) {
-	    this.inkStory.OpenStory("item_" + item.GetItemName(), item.gameObject.GetComponent<SpriteRenderer>().sprite);
-	    return;
-	}
-	*/
     }
 
     private void PickUp(PickUpable item) {

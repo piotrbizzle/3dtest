@@ -19,11 +19,14 @@ public class Sprite3D : MonoBehaviour
     private Sprite[] lSprites = new Sprite[5];
     private Sprite[] mSprites = new Sprite[5];
     private Sprite[] rSprites = new Sprite[5];
-
+    public Sprite dialogueSprite;
     
     void Start() {
 	// get color config
 	this.config = GameObject.Find("/Config3D").GetComponent<Config3D>();
+
+	// set dialogue sprite from default sprite
+	this.dialogueSprite = this.GetComponent<SpriteRenderer>().sprite;
 	
 	// load all required sprites
 	if (this.isStatic) {
