@@ -20,6 +20,7 @@ public class Sprite3D : MonoBehaviour
     private Sprite[] mSprites = new Sprite[5];
     private Sprite[] rSprites = new Sprite[5];
     public Sprite dialogueSprite;
+    public Sprite spriteReal;
     
     void Start() {
 	// get color config
@@ -27,6 +28,7 @@ public class Sprite3D : MonoBehaviour
 
 	// set dialogue sprite from default sprite
 	this.dialogueSprite = this.GetComponent<SpriteRenderer>().sprite;
+	this.spriteReal = Resources.Load<Sprite>(this.name + "_real");
 	
 	// load all required sprites
 	if (this.isStatic) {

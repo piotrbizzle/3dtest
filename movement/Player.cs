@@ -210,8 +210,9 @@ public class Player : MonoBehaviour
 
 	// start dialogue
 	Dialogue dialogue = collider.gameObject.GetComponent<Dialogue>();
-	if (dialogue != null && this.spaceHeld) {	    
-	    this.inkStory.OpenStory(dialogue.startingKnot, dialogue.gameObject.GetComponent<Sprite3D>().dialogueSprite);
+	if (dialogue != null && this.spaceHeld) {
+	    Sprite dialogueSprite = this.currentScreen.isRealWorld ? dialogue.gameObject.GetComponent<Sprite3D>().spriteReal : dialogue.gameObject.GetComponent<Sprite3D>().dialogueSprite;
+	    this.inkStory.OpenStory(dialogue.startingKnot, dialogueSprite);
 	    return;
 	}
 	

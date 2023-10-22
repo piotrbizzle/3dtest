@@ -8,6 +8,7 @@ public class Screen : MonoBehaviour {
     public Screen east;
     public Screen south;
     public Screen west;
+    public bool isRealWorld;
 
     void Start() {
 	// get rid of placeholder visualization
