@@ -44,6 +44,10 @@ public class Player : MonoBehaviour
     void Init() {
 	this.inited = true;
 	this.currentScreen.gameObject.SetActive(true);
+	if (this.currentScreen.inRealWorld) {
+	   this.EnterRealWorld();
+       }
+
     }
 
     void Update() {	
@@ -182,6 +186,16 @@ public class Player : MonoBehaviour
     }
 
     private void SwapScreens(Screen newScreen) {
+	// check if graphics style needs to change
+	if (this.currentScreen.inRealWorld && !newScreen.inRealWorld) {
+	    this.ExitRealWorld();
+	}
+	if (!this.currentScreen.inRealWorld && newScreen.inRealWorld) {
+	    this.EnterRealWorld();
+	}
+
+	
+	// swap screens
 	this.currentScreen.gameObject.SetActive(false);
 	this.currentScreen = newScreen;
 	this.currentTile = this.currentScreen.name;
@@ -211,7 +225,7 @@ public class Player : MonoBehaviour
 	// start dialogue
 	Dialogue dialogue = collider.gameObject.GetComponent<Dialogue>();
 	if (dialogue != null && this.spaceHeld) {
-	    Sprite dialogueSprite = this.currentScreen.isRealWorld ? dialogue.gameObject.GetComponent<Sprite3D>().spriteReal : dialogue.gameObject.GetComponent<Sprite3D>().dialogueSprite;
+	    Sprite dialogueSprite = this.currentScreen.inRealWorld ? dialogue.gameObject.GetComponent<Sprite3D>().spriteReal : dialogue.gameObject.GetComponent<Sprite3D>().dialogueSprite;
 	    this.inkStory.OpenStory(dialogue.startingKnot, dialogueSprite);
 	    return;
 	}
@@ -231,10 +245,9 @@ public class Player : MonoBehaviour
 	}
 
 	// don't pick up if on a different depth
-	if (item.GetComponent<Sprite3D>().GetDepth() != this.GetComponent<Sprite3D>().GetDepth()) {
+	if (item.GetComponent<Sprite3D>() == null || item.GetComponent<Sprite3D>().GetDepth() != this.GetComponent<Sprite3D>().GetDepth()) {
 	    return;
-	}
-	
+	}	
 
 	// check if there is room in the inventory
 	if (this.ItemCount() >= 3) {
@@ -307,9 +320,11 @@ public class Player : MonoBehaviour
     }
     
     public void ReceiveItem(string itemName) {
-	PickUpable item = new GameObject().AddComponent<PickUpable>();
-	item.InitCreatedItem(itemName.Replace('_', '/'), this.GetComponent<Sprite3D>().GetDepth());
-	
+	GameObject itemGo = new GameObject(itemName.Replace('_', '/'));
+	itemGo.AddComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>(itemGo.name);
+	PickUpable item = itemGo.AddComponent<PickUpable>();
+	item.InitCreatedItem(this.GetComponent<Sprite3D>().GetDepth(), this.currentScreen.inRealWorld);
+
 	if (this.ItemCount() < 3) {
 	    // pick up item if there's room
 	    this.PickUp(item);
@@ -337,5 +352,25 @@ public class Player : MonoBehaviour
 
 	this.FixInventory();
 	this.UpdateInkStoryInventory();
+    }
+
+    public void EnterRealWorld() {
+	this.GetComponent<Sprite3D>().EnterRealWorld();
+	foreach (Transform child in this.transform) {
+	    if (child.GetComponent<Sprite3D>() == null) {
+		continue;
+	    }
+	    child.GetComponent<Sprite3D>().EnterRealWorld();
+	}
+    }
+
+    public void ExitRealWorld() {
+	this.GetComponent<Sprite3D>().ExitRealWorld();
+	foreach (Transform child in this.transform) {
+	    if (child.GetComponent<Sprite3D>() == null) {
+		continue;
+	    }
+	    child.GetComponent<Sprite3D>().ExitRealWorld();
+	}
     }
 }

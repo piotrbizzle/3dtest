@@ -21,6 +21,7 @@ public class Sprite3D : MonoBehaviour
     private Sprite[] rSprites = new Sprite[5];
     public Sprite dialogueSprite;
     public Sprite spriteReal;
+    public bool inRealWorld;
     
     void Start() {
 	// get color config
@@ -61,6 +62,10 @@ public class Sprite3D : MonoBehaviour
     }
 
     void Update() {
+	if (this.inRealWorld) {
+	    return;
+	}
+	
 	// adjust colors
 	if (this.lGo.GetComponent<SpriteRenderer>().color != this.config.lColor) {
 	    this.lGo.GetComponent<SpriteRenderer>().color = this.config.lColor;
@@ -125,5 +130,21 @@ public class Sprite3D : MonoBehaviour
 
     public int GetDepth() {
 	return this.depth;
+    }
+
+    public void EnterRealWorld() {
+	this.inRealWorld = true;
+	this.GetComponent<SpriteRenderer>().sprite = this.spriteReal;
+	this.GetComponent<SpriteRenderer>().color = Color.white;
+	this.lGo.SetActive(false);
+	this.rGo.SetActive(false);
+	this.ResetScaleSprite();	
+    }
+
+    public void ExitRealWorld() {
+	this.inRealWorld = false;
+	this.lGo.SetActive(true);
+	this.rGo.SetActive(true);
+	this.SetDepth(this.depth);
     }
 }

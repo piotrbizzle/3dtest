@@ -67,7 +67,7 @@ def main(file_prefix):
                             fill=(255, 255, 255, 255),
                         )
                 screen_img.save(
-                    "out/" + str(screen_x) + "_" + str(screen_y) + "_" + file_prefix + ".png",
+                    "out/" + str(screen_x) + "_" + str(screen_y) + "_" + file_prefix[:-1] + "map" + file_prefix[-1] + ".png",
                     "PNG",
                 )
 

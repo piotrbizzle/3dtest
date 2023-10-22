@@ -23,7 +23,7 @@ def main(depth, file_name):
                 for y in range(img.size[0]):
                     pixel = img.getpixel((y,x))
                     # -1 = empty, 0 = black, >0 = white/grey
-                    p_value = -1 if not pixel[1] else pixel[0]
+                    p_value = -1 if not pixel[-1] else pixel[0]
                     l_array[x].append(p_value)
                     r_array[x].append(p_value)
                 l_array[x] += [-1] * (2 * offset)
