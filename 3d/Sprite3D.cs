@@ -4,11 +4,10 @@ using UnityEngine;
 
 public class Sprite3D : MonoBehaviour
 {
-    [SerializeField]
-    private bool isStatic;
 
-    [SerializeField]
-    private int depth;
+    public bool isStatic;
+    public int depth;
+    
     private int nextDepth;
 
     private Config3D config;
