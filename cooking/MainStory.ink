@@ -16,5 +16,17 @@ VAR score = 100
 
 == foods_fish ==
 - It's a Fish! Aquatic!
-+ "Okay"
++ "More Fish!"
+  -> more_fish 
++ "Less Fish!"
+  -> less_fish
+
+== more_fish ==
+ - Moar! # give_foods_fish
+ + "Okay"
+    -> END
+
+== less_fish ==
+ - Noooo! # take_foods_fish
+ + "Okay"
     -> END

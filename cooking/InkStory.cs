@@ -80,7 +80,6 @@ public class InkStory : MonoBehaviour
 	for (int i = 0; i < story.currentTags.Count; i++) {
 	    string tag = story.currentTags[i].Trim();
 
-	    /*
 	    // give item
 	    if (tag.StartsWith("give_")) {
 		string itemName = tag.Substring(5);
@@ -92,7 +91,6 @@ public class InkStory : MonoBehaviour
 		string itemName = tag.Substring(5);
 		this.player.LoseItem(itemName);
 	    }
-	    */
 	}
     }
 
@@ -123,7 +121,7 @@ public class InkStory : MonoBehaviour
     public void UpdateInventory(List<string> itemNames) {
 	for (int i = 0; i < 3; i++) {
 	    if (i < itemNames.Count) {
-		this.story.variablesState["inventory_" + i.ToString()] = itemNames[i];
+		this.story.variablesState["inventory_" + i.ToString()] = itemNames[i].Replace('/', '_');
 	    } else {
 		this.story.variablesState["inventory_" + i.ToString()] = "";
 	    }

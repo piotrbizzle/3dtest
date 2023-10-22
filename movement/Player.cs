@@ -236,6 +236,19 @@ public class Player : MonoBehaviour
 	
 
 	// check if there is room in the inventory
+	if (this.ItemCount() >= 3) {
+	    return;
+	}
+
+	// add item to player
+	GameObject itemGo = item.gameObject;
+	itemGo.transform.parent = this.gameObject.transform;
+
+	this.FixInventory();       
+	this.UpdateInkStoryInventory();
+    }
+
+    private int ItemCount() {
 	int heldItemsCount = 0;
 	for (int i = 0; i < this.gameObject.transform.childCount; i++) {
 	    Transform child = this.gameObject.transform.GetChild(i);
@@ -245,20 +258,10 @@ public class Player : MonoBehaviour
 		continue;
 	    }
 	    heldItemsCount += 1;
-	}	    
-	if (heldItemsCount >= 3) {
-	    return;
 	}
-
-	// add item to player
-	GameObject itemGo = item.gameObject;
-	itemGo.transform.parent = this.gameObject.transform;
-
-	this.FixInventory();
-	
-	// this.UpdateInkStoryInventory();
+	return heldItemsCount;
     }
-
+    
     private void FixInventory() {
 	Vector3 playerPosition = this.gameObject.transform.position;
 	int itemCount = 0;
@@ -288,6 +291,50 @@ public class Player : MonoBehaviour
 	    }
 	}
 
-	// this.UpdateInkStoryInventory();
+	this.UpdateInkStoryInventory();
+    }
+
+    public void UpdateInkStoryInventory() {
+	List<string> itemNames = new List<string>();
+	foreach (Transform child in this.transform) {
+	    if (child.GetComponent<PickUpable>() == null) {
+		continue;
+	    }
+	    itemNames.Add(child.gameObject.GetComponent<PickUpable>().GetItemName());
+	}
+	this.inkStory.UpdateInventory(itemNames);
+    }
+    
+    public void ReceiveItem(string itemName) {
+	PickUpable item = new GameObject().AddComponent<PickUpable>();
+	item.InitCreatedItem(itemName.Replace('_', '/'), this.GetComponent<Sprite3D>().GetDepth());
+	
+	if (this.ItemCount() < 3) {
+	    // pick up item if there's room
+	    this.PickUp(item);
+	} else {
+	    // otherwise, drop item on the ground
+	    item.gameObject.transform.parent = this.currentScreen.transform;
+	    item.gameObject.transform.position = this.gameObject.transform.position;
+	}
+    }
+
+    public void LoseItem(string itemName) {
+	Vector3 playerPosition = this.gameObject.transform.position;
+
+	for (int i = 0; i < this.gameObject.transform.childCount; i++) {
+	    Transform child = this.gameObject.transform.GetChild(i);
+	    if (child.gameObject.GetComponent<PickUpable>() == null) {
+		continue;
+	    }	       
+	    if (child.gameObject.GetComponent<PickUpable>().GetItemName() == itemName.Replace('_', '/')) {
+		child.parent = child.parent.parent; // fixes held item count
+		GameObject.Destroy(child.gameObject);
+		break;
+	    }
+	}
+
+	this.FixInventory();
+	this.UpdateInkStoryInventory();
     }
 }

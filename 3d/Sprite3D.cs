@@ -92,6 +92,12 @@ public class Sprite3D : MonoBehaviour
 	}	
     }
 
+    public void ResetScaleSprite() {
+	this.transform.localScale = new Vector3(1f, 1f, 1f);
+	this.rGo.transform.localScale = new Vector3(1f, 1f, 1f);
+	this.lGo.transform.localScale = new Vector3(1f, 1f, 1f);
+    }
+    
     private void ScaleSprite() {
 	// skip scaling for held items
 	if (this.transform.GetComponent<PickUpable>() != null && this.transform.parent.GetComponent<Player>() != null) {
@@ -99,6 +105,8 @@ public class Sprite3D : MonoBehaviour
 	}
 	float scaleFactor = this.GetScaleFactor();
 	this.transform.localScale = new Vector3(scaleFactor, scaleFactor, 1f);
+	this.rGo.transform.localScale = new Vector3(1f, 1f, 1f);
+	this.lGo.transform.localScale = new Vector3(1f, 1f, 1f);
     }
 
     public float GetScaleFactor() {
