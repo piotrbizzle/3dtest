@@ -20,6 +20,11 @@ VAR score = 100
   -> more_fish 
 + "Less Fish!"
   -> less_fish
++ "Swap Screens!"
+  -> swap_fish
++ "Nevermind"
+  -> END
+
 
 == more_fish ==
  - Moar! # give_foods_fish
@@ -28,5 +33,10 @@ VAR score = 100
 
 == less_fish ==
  - Noooo! # take_foods_fish
+ + "Okay"
+    -> END
+
+== swap_fish ==
+ - OOOOKAY! # swap_screen
  + "Okay"
     -> END

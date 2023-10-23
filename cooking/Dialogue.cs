@@ -5,4 +5,5 @@ using UnityEngine;
 public class Dialogue : MonoBehaviour
 {
     public string startingKnot;
+    public Screen swapScreen;
 }

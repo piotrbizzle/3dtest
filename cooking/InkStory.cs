@@ -15,6 +15,8 @@ public class InkStory : MonoBehaviour
     public Player player;
     private Sprite speakerSprite;
 
+    private Screen swapScreen;
+    private bool doSwapScreen;
 
     // UI Prefabs
     public Text textPrefab;
@@ -26,9 +28,10 @@ public class InkStory : MonoBehaviour
 	this.story = new Story(inkJSONAsset.text);
     }
     
-    public void OpenStory(string startingKnot, Sprite speakerSprite) {
+    public void OpenStory(string startingKnot, Sprite speakerSprite, Screen swapScreen) {
 	this.speakerSprite = speakerSprite;
 	this.screenDimmer.color = new Color(0f, 0f, 0f, 0.5f);
+	this.swapScreen = swapScreen;
 	this.story.ChoosePathString(startingKnot);
 	this.isVisible = true;
 	this.RefreshView();
@@ -48,7 +51,6 @@ public class InkStory : MonoBehaviour
 	    Text storyText = Instantiate(textPrefab) as Text;
 	    storyText.text = this.story.Continue().Trim();
 	    storyText.transform.SetParent(this.subCanvas.transform);
-
 	    this.ProcessTags();
 	}
 	
@@ -66,7 +68,11 @@ public class InkStory : MonoBehaviour
 	    // exit out of story
 	    this.ClearView();
 	    this.isVisible = false;	    	    
-	    this.screenDimmer.color = Color.clear;		
+	    this.screenDimmer.color = Color.clear;
+	    if (this.doSwapScreen) {
+		this.player.SwapScreens(this.swapScreen);
+		this.doSwapScreen = false;
+	    }
 	}
     }
 
@@ -90,6 +96,12 @@ public class InkStory : MonoBehaviour
 	    if (tag.StartsWith("take_")) {
 		string itemName = tag.Substring(5);
 		this.player.LoseItem(itemName);
+	    }
+
+	    // take item
+	    if (tag.StartsWith("swap_screen")) {
+		Debug.Log("TAG");
+		this.doSwapScreen = true;
 	    }
 	}
     }

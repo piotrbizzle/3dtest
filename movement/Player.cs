@@ -166,26 +166,27 @@ public class Player : MonoBehaviour
 	Transform playerTransform = this.gameObject.transform;
 	if (playerTransform.position.y > ScreenTopY && currentScreen.north != null) {
 	    playerTransform.Translate(new Vector3(0.0f, -8f, 0.0f));
-    	    this.SwapScreens(this.currentScreen.north);
+    	    this.MoveScreens(this.currentScreen.north);
 	}
 	// go south
 	if (playerTransform.position.y < ScreenBottomY && currentScreen.south != null) {
 	    playerTransform.Translate(new Vector3(0.0f, 8f, 0.0f));
-    	    this.SwapScreens(this.currentScreen.south);
+    	    this.MoveScreens(this.currentScreen.south);
 	}
 	// go east
 	if (playerTransform.position.x > ScreenRightX && currentScreen.east != null) {
     	    playerTransform.Translate(new Vector3(-10f, 0.0f, 0.0f));
-	    this.SwapScreens(this.currentScreen.east);
+	    this.MoveScreens(this.currentScreen.east);
 	}
 	// go west
 	if (playerTransform.position.x < ScreenLeftX && currentScreen.west != null) {
 	    playerTransform.Translate(new Vector3(10f, 0.0f, 0.0f));
-	    this.SwapScreens(this.currentScreen.west);
+	    this.MoveScreens(this.currentScreen.west);
 	}
     }
 
-    private void SwapScreens(Screen newScreen) {
+    // move to a new screen
+    private void MoveScreens(Screen newScreen) {
 	// check if graphics style needs to change
 	if (this.currentScreen.inRealWorld && !newScreen.inRealWorld) {
 	    this.ExitRealWorld();
@@ -200,6 +201,48 @@ public class Player : MonoBehaviour
 	this.currentScreen = newScreen;
 	this.currentTile = this.currentScreen.name;
 	this.currentScreen.gameObject.SetActive(true);
+    }
+
+    // replace the current screen with a new one
+    public void SwapScreens(Screen newScreen) {
+	// link up all connecting screens to the new one
+	if (this.currentScreen.north != null) {
+	    this.currentScreen.north.south = newScreen;
+	}
+	newScreen.north = this.currentScreen.north;
+	
+	if (this.currentScreen.east != null) {
+	    this.currentScreen.east.west = newScreen;
+	}
+	newScreen.east = this.currentScreen.east;
+	
+	if (this.currentScreen.south != null) {
+	    this.currentScreen.south.north = newScreen;
+	}
+	newScreen.south = this.currentScreen.south;
+	
+	if (this.currentScreen.west != null) {
+	    this.currentScreen.west.east = newScreen;	    
+	}
+	newScreen.west = this.currentScreen.west;
+
+	// then move the all of the objects to the new screen
+	foreach (Transform child in this.currentScreen.transform) {
+	    // all characters and items have Dialogue
+	    if (child.GetComponent<Dialogue>() == null) {
+		continue;
+	    }
+	    child.SetParent(newScreen.transform);
+	    if (this.currentScreen.inRealWorld && !newScreen.inRealWorld) {
+		child.GetComponent<Sprite3D>().ExitRealWorld();
+	    }
+	    if (!this.currentScreen.inRealWorld && newScreen.inRealWorld) {
+		child.GetComponent<Sprite3D>().EnterRealWorld();
+	    }
+	}
+
+	// then move the player to the new screen
+	this.MoveScreens(newScreen);
     }
 
     private void Act() {	
@@ -225,8 +268,8 @@ public class Player : MonoBehaviour
 	// start dialogue
 	Dialogue dialogue = collider.gameObject.GetComponent<Dialogue>();
 	if (dialogue != null && this.spaceHeld) {
-	    Sprite dialogueSprite = this.currentScreen.inRealWorld ? dialogue.gameObject.GetComponent<Sprite3D>().spriteReal : dialogue.gameObject.GetComponent<Sprite3D>().dialogueSprite;
-	    this.inkStory.OpenStory(dialogue.startingKnot, dialogueSprite);
+	    Sprite dialogueSprite = this.currentScreen.inRealWorld ? dialogue.gameObject.GetComponent<Sprite3D>().spriteReal : dialogue.gameObject.GetComponent<Sprite3D>().dialogueSprite;	    
+	    this.inkStory.OpenStory(dialogue.startingKnot, dialogueSprite, dialogue.swapScreen);
 	    return;
 	}
 	
