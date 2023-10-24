@@ -228,8 +228,7 @@ public class Player : MonoBehaviour
 
 	// then move the all of the objects to the new screen
 	foreach (Transform child in this.currentScreen.transform) {
-	    // all characters and items have Dialogue
-	    if (child.GetComponent<Dialogue>() == null) {
+	    if (child.GetComponent<PickUpable>() == null) {
 		continue;
 	    }
 	    child.SetParent(newScreen.transform);
